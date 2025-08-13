@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import CategoriesModel from "../models/categories_model.js";
-import Marketplace_Reviews_Model from "../models/marketplace_reviews_model.js";
+import CategoriesModel from "../../models/categories_model.js";
+import Kwork_Reviews_Model from "../../models/marketplace_reviews/kwork_review_model.js";
 
 export const create = async (req, res) => {
     try {
@@ -10,7 +10,6 @@ export const create = async (req, res) => {
             objectId: ['categories_id'],
             number: ['price_usd', 'price_bdt'],
             array: ['features']
-            // boolean: ['is_available']
         };
 
         // String validation
@@ -41,14 +40,6 @@ export const create = async (req, res) => {
                 return res.status(400).json({ success: false, message: `${field} must be a non-empty array of non-empty strings.` });
             }
         }
-        // Boolean validation
-        // for (const field of fields_validate.boolean) {
-        //     const value = req.body[field];
-        //     if (typeof value !== 'boolean') {
-        //         return res.status(400).json({ success: false, message: `${field} must be a boolean value (true or false).` });
-        //     }
-        // }
-
         // status validation
         if (status && !['active', 'deactive'].includes(status)) {
             return res.status(400).json({ success: false, message: 'status must be either "active" or "deactive"' });
@@ -57,10 +48,10 @@ export const create = async (req, res) => {
         const find_categories = await CategoriesModel.findById(categories_id);
         if (!find_categories) { return res.json({ success: false, message: "Category Not Found" }) }
 
-        const exist_items = await Marketplace_Reviews_Model.exists({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') } }] })
+        const exist_items = await Kwork_Reviews_Model.exists({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') } }] })
         if (exist_items) { return res.json({ success: false, message: "Already exists. Try another" }) }
 
-        const result = await new Marketplace_Reviews_Model({
+        const result = await new Kwork_Reviews_Model({
             item_name: item_name,
             categories_id: categories_id,
             categories_name: find_categories.categories_name,
@@ -119,18 +110,12 @@ export const show = async (req, res) => {
             dataFilter.status = status;
         }
 
-        // Available filter (if provided)
-        // if (available && available !== 'undefined' && available !== 'null' && available !== '') {
-        //     const isAvailable = available === 'true';
-        //     dataFilter.is_available = isAvailable;
-        // }
-
-        const result = await Marketplace_Reviews_Model.find(dataFilter)
+        const result = await Kwork_Reviews_Model.find(dataFilter)
             .sort({ createdAt: -1 })
             .limit(limit)
             .skip((page - 1) * limit)
 
-        const count = await Marketplace_Reviews_Model.find(dataFilter).countDocuments();
+        const count = await Kwork_Reviews_Model.find(dataFilter).countDocuments();
 
         if (result.length === 0) {
             return res.json({ success: false, message: "No Data Found" });
@@ -165,7 +150,7 @@ export const single = async (req, res) => {
         }
 
         // show the items value
-        const result = await Marketplace_Reviews_Model.findById(id);
+        const result = await Kwork_Reviews_Model.findById(id);
         if (!result) {
             return res.json({ success: false, message: "No Data Found" });
         } else {
@@ -191,7 +176,7 @@ export const update = async (req, res) => {
 
         // check exist data
         if (!mongoose.Types.ObjectId.isValid(id)) { return res.json({ success: false, message: "Invalid ID Format" }) }
-        const find_items = await Marketplace_Reviews_Model.findById(id);
+        const find_items = await Kwork_Reviews_Model.findById(id);
         if (!find_items) { return res.json({ success: false, message: "Item Not Found" }) }
 
         const fields_validate = {
@@ -199,7 +184,6 @@ export const update = async (req, res) => {
             objectId: ['categories_id'],
             number: ['price_usd', 'price_bdt'],
             array: ['features']
-            // boolean: ['is_available']
         };
 
         // String validation
@@ -238,15 +222,6 @@ export const update = async (req, res) => {
                 }
             }
         }
-        // Boolean validation
-        // for (const field of fields_validate.boolean) {
-        //     if (req.body[field] !== undefined) {
-        //         const value = req.body[field];
-        //         if (typeof value !== 'boolean') {
-        //             return res.status(400).json({ success: false, message: `${field} must be a boolean value (true or false).` });
-        //         }
-        //     }
-        // }
         // status validation
         if (status && !['active', 'deactive'].includes(status)) {
             return res.status(400).json({
@@ -258,10 +233,10 @@ export const update = async (req, res) => {
         const find_categories = await CategoriesModel.findById(categories_id);
         if (!find_categories) { return res.json({ success: false, message: "Category Not Found" }) }
 
-        const exist_items = await Marketplace_Reviews_Model.exists({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') }, _id: { $ne: id } }] })
+        const exist_items = await Kwork_Reviews_Model.exists({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') }, _id: { $ne: id } }] })
         if (exist_items) { return res.json({ success: false, message: "already exists. try another" }) }
 
-        const result = await Marketplace_Reviews_Model.findByIdAndUpdate(id, {
+        const result = await Kwork_Reviews_Model.findByIdAndUpdate(id, {
             item_name: item_name,
             categories_id: categories_id,
             categories_name: find_categories.categories_name,
@@ -302,10 +277,10 @@ export const destroy = async (req, res) => {
         }
 
         // check exist data
-        const find_items = await Marketplace_Reviews_Model.findById(id);
+        const find_items = await Kwork_Reviews_Model.findById(id);
         if (!find_items) { return res.json({ success: false, message: "Item Not Found" }) }
 
-        const result = await Marketplace_Reviews_Model.findByIdAndDelete(id);
+        const result = await Kwork_Reviews_Model.findByIdAndDelete(id);
 
         // Check not found
         if (!result) {

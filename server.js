@@ -19,7 +19,7 @@ app.use(morgan("dev"));
 app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5174", credentials: true }));
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/backend")
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/review_seller")
     .then(() => console.log(colors.bgMagenta("MongoDB Connected Success")))
     .catch(error => console.error(colors.bgRed("MongoDB connection error:"), error));
 

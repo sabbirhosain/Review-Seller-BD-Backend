@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const Social_Media_Boost_Schema = new mongoose.Schema({
+const Kwork_Reviews_Schema = new mongoose.Schema({
     item_name: {
         type: String,
         required: true,
@@ -21,26 +21,15 @@ const Social_Media_Boost_Schema = new mongoose.Schema({
         trim: true,
         default: [],
     },
-    price: {
+    price_usd: {
         type: Number,
         trim: true,
         default: 0
     },
-    quentity: {
+    price_bdt: {
         type: Number,
         trim: true,
         default: 0
-    },
-    duration: {
-        type: Number,
-        trim: true,
-        default: 0
-    },
-    duration_type: {
-        type: String,
-        trim: true,
-        enum: ['Day', 'Month', 'Year'],
-        default: 'Day'
     },
     review_from: {
         type: String,
@@ -64,5 +53,5 @@ const Social_Media_Boost_Schema = new mongoose.Schema({
     }
 }, { timestamps: true })
 
-const Social_Media_Boost_Model = mongoose.model("Social_Media_Boost", Social_Media_Boost_Schema);
-export default Social_Media_Boost_Model
+const Kwork_Reviews_Model = mongoose.model("Kwork_Reviews", Kwork_Reviews_Schema);
+export default Kwork_Reviews_Model

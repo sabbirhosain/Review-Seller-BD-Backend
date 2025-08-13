@@ -1,7 +1,14 @@
 import express from "express";
 import * as categories_controller from "../controllers/categories_controller.js";
-import * as marketplace_reviews_controller from "../controllers/marketplace_reviews_controller.js";
-import * as social_media_boost_controller from "../controllers/social_media_boost_controller.js";
+import * as fiverr_review_controller from "../controllers/marketplace_reviews/fiverr_review_controller.js";
+import * as upwork_review_controller from "../controllers/marketplace_reviews/upwork_review_controller.js";
+import * as kwork_review_controller from "../controllers/marketplace_reviews/kwork_review_controller.js";
+import * as google_review_controller from "../controllers/marketplace_reviews/google_review_controller.js";
+import * as fetchers_review_controller from "../controllers/marketplace_reviews/fetchers_review_controller.js";
+import * as people_per_review_controller from "../controllers/marketplace_reviews/people_per_review_controller.js";
+import * as facebook_boost_controller from "../controllers/social_media_boost/facebook_boost_controller.js";
+import * as youtube_boost_controller from "../controllers/social_media_boost/youtube_boost_controller.js";
+import * as google_ads_boost_controller from "../controllers/social_media_boost/google_ads_controller.js";
 import * as contact_controller from "../controllers/contact_controller.js";
 const router = express.Router();
 
@@ -12,19 +19,68 @@ router.get("/items/categories/:id", categories_controller.single)
 router.put("/items/categories/:id", categories_controller.update)
 router.delete("/items/categories/:id", categories_controller.destroy)
 
-// Private routes || /api/v1/marketplace-reviews/items/product
-router.post("/marketplace-reviews/items/product", marketplace_reviews_controller.create)
-router.get("/marketplace-reviews/items/product", marketplace_reviews_controller.show)
-router.get("/marketplace-reviews/items/product/:id", marketplace_reviews_controller.single)
-router.put("/marketplace-reviews/items/product/:id", marketplace_reviews_controller.update)
-router.delete("/marketplace-reviews/items/product/:id", marketplace_reviews_controller.destroy)
+// Private routes || /api/v1/marketplace-reviews/items/fiverr
+router.post("/marketplace-reviews/items/fiverr", fiverr_review_controller.create)
+router.get("/marketplace-reviews/items/fiverr", fiverr_review_controller.show)
+router.get("/marketplace-reviews/items/fiverr/:id", fiverr_review_controller.single)
+router.put("/marketplace-reviews/items/fiverr/:id", fiverr_review_controller.update)
+router.delete("/marketplace-reviews/items/fiverr/:id", fiverr_review_controller.destroy)
 
-// Private routes || /api/v1/marketplace-reviews/items/product
-router.post("/social-media-boost/items/product", social_media_boost_controller.create)
-router.get("/social-media-boost/items/product", social_media_boost_controller.show)
-router.get("/social-media-boost/items/product/:id", social_media_boost_controller.single)
-router.put("/social-media-boost/items/product/:id", social_media_boost_controller.update)
-router.delete("/social-media-boost/items/product/:id", social_media_boost_controller.destroy)
+// Private routes || /api/v1/marketplace-reviews/items/upwork
+router.post("/marketplace-reviews/items/upwork", upwork_review_controller.create)
+router.get("/marketplace-reviews/items/upwork", upwork_review_controller.show)
+router.get("/marketplace-reviews/items/upwork/:id", upwork_review_controller.single)
+router.put("/marketplace-reviews/items/upwork/:id", upwork_review_controller.update)
+router.delete("/marketplace-reviews/items/upwork/:id", upwork_review_controller.destroy)
+
+// Private routes || /api/v1/marketplace-reviews/items/kwork
+router.post("/marketplace-reviews/items/kwork", kwork_review_controller.create)
+router.get("/marketplace-reviews/items/kwork", kwork_review_controller.show)
+router.get("/marketplace-reviews/items/kwork/:id", kwork_review_controller.single)
+router.put("/marketplace-reviews/items/kwork/:id", kwork_review_controller.update)
+router.delete("/marketplace-reviews/items/kwork/:id", kwork_review_controller.destroy)
+
+// Private routes || /api/v1/marketplace-reviews/items/google
+router.post("/marketplace-reviews/items/google", google_review_controller.create)
+router.get("/marketplace-reviews/items/google", google_review_controller.show)
+router.get("/marketplace-reviews/items/google/:id", google_review_controller.single)
+router.put("/marketplace-reviews/items/google/:id", google_review_controller.update)
+router.delete("/marketplace-reviews/items/google/:id", google_review_controller.destroy)
+
+// Private routes || /api/v1/marketplace-reviews/items/people-per
+router.post("/marketplace-reviews/items/people-per", people_per_review_controller.create)
+router.get("/marketplace-reviews/items/people-per", people_per_review_controller.show)
+router.get("/marketplace-reviews/items/people-per/:id", people_per_review_controller.single)
+router.put("/marketplace-reviews/items/people-per/:id", people_per_review_controller.update)
+router.delete("/marketplace-reviews/items/people-per/:id", people_per_review_controller.destroy)
+
+// Private routes || /api/v1/marketplace-reviews/items/fetchers
+router.post("/marketplace-reviews/items/fetchers", fetchers_review_controller.create)
+router.get("/marketplace-reviews/items/fetchers", fetchers_review_controller.show)
+router.get("/marketplace-reviews/items/fetchers/:id", fetchers_review_controller.single)
+router.put("/marketplace-reviews/items/fetchers/:id", fetchers_review_controller.update)
+router.delete("/marketplace-reviews/items/fetchers/:id", fetchers_review_controller.destroy)
+
+// Private routes || /api/v1/social-media-boost/items/facebook
+router.post("/social-media-boost/items/facebook", facebook_boost_controller.create)
+router.get("/social-media-boost/items/facebook", facebook_boost_controller.show)
+router.get("/social-media-boost/items/facebook/:id", facebook_boost_controller.single)
+router.put("/social-media-boost/items/facebook/:id", facebook_boost_controller.update)
+router.delete("/social-media-boost/items/facebook/:id", facebook_boost_controller.destroy)
+
+// Private routes || /api/v1/social-media-boost/items/youtube
+router.post("/social-media-boost/items/youtube", youtube_boost_controller.create)
+router.get("/social-media-boost/items/youtube", youtube_boost_controller.show)
+router.get("/social-media-boost/items/youtube/:id", youtube_boost_controller.single)
+router.put("/social-media-boost/items/youtube/:id", youtube_boost_controller.update)
+router.delete("/social-media-boost/items/youtube/:id", youtube_boost_controller.destroy)
+
+// Private routes || /api/v1/social-media-boost/items/google-ads
+router.post("/social-media-boost/items/google-ads", google_ads_boost_controller.create)
+router.get("/social-media-boost/items/google-ads", google_ads_boost_controller.show)
+router.get("/social-media-boost/items/google-ads/:id", google_ads_boost_controller.single)
+router.put("/social-media-boost/items/google-ads/:id", google_ads_boost_controller.update)
+router.delete("/social-media-boost/items/google-ads/:id", google_ads_boost_controller.destroy)
 
 // Private routes || /api/v1/contact-from
 router.post("/contact-from", contact_controller.create)

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const Marketplace_Reviews_Schema = new mongoose.Schema({
+const Google_Ads_Schema = new mongoose.Schema({
     item_name: {
         type: String,
         required: true,
@@ -21,15 +21,26 @@ const Marketplace_Reviews_Schema = new mongoose.Schema({
         trim: true,
         default: [],
     },
-    price_usd: {
+    price: {
         type: Number,
         trim: true,
         default: 0
     },
-    price_bdt: {
+    quentity: {
         type: Number,
         trim: true,
         default: 0
+    },
+    duration: {
+        type: Number,
+        trim: true,
+        default: 0
+    },
+    duration_type: {
+        type: String,
+        trim: true,
+        enum: ['Day', 'Month', 'Year'],
+        default: 'Day'
     },
     review_from: {
         type: String,
@@ -53,5 +64,5 @@ const Marketplace_Reviews_Schema = new mongoose.Schema({
     }
 }, { timestamps: true })
 
-const Marketplace_Reviews_Model = mongoose.model("Marketplace_Reviews", Marketplace_Reviews_Schema);
-export default Marketplace_Reviews_Model
+const Google_Ads_Model = mongoose.model("Google_Ads_Campaign", Google_Ads_Schema);
+export default Google_Ads_Model

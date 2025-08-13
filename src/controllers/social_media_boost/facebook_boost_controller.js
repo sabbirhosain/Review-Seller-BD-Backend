@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import CategoriesModel from "../models/categories_model.js";
-import Social_Media_Boost_Model from "../models/social_media_boost_model.js";
+import CategoriesModel from "../../models/categories_model.js";
+import Facebook_Boost_Model from "../../models/social_media_boost/facebook_boost_model.js";
 
 export const create = async (req, res) => {
     try {
@@ -60,10 +60,10 @@ export const create = async (req, res) => {
         const find_categories = await CategoriesModel.findById(categories_id);
         if (!find_categories) { return res.json({ success: false, message: "Category Not Found" }) }
 
-        const exist_items = await Social_Media_Boost_Model.exists({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') } }] })
+        const exist_items = await Facebook_Boost_Model.exists({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') } }] })
         if (exist_items) { return res.json({ success: false, message: "already exists. try another" }) }
 
-        const result = await new Social_Media_Boost_Model({
+        const result = await new Facebook_Boost_Model({
             item_name: item_name,
             categories_id: categories_id,
             categories_name: find_categories.categories_name,
@@ -124,12 +124,12 @@ export const show = async (req, res) => {
             dataFilter.status = status;
         }
 
-        const result = await Social_Media_Boost_Model.find(dataFilter)
+        const result = await Facebook_Boost_Model.find(dataFilter)
             .sort({ createdAt: -1 })
             .limit(limit)
             .skip((page - 1) * limit)
 
-        const count = await Social_Media_Boost_Model.find(dataFilter).countDocuments();
+        const count = await Facebook_Boost_Model.find(dataFilter).countDocuments();
 
         if (result.length === 0) {
             return res.json({ success: false, message: "No Data Found" });
@@ -190,7 +190,7 @@ export const update = async (req, res) => {
 
         // Find the items by ID
         if (!mongoose.Types.ObjectId.isValid(id)) { return res.json({ success: false, message: "Invalid ID Format" }) }
-        const find_items = await Social_Media_Boost_Model.findById(id);
+        const find_items = await Facebook_Boost_Model.findById(id);
         if (!find_items) { return res.json({ success: false, message: "Item Not Found" }) }
 
         const fields_validate = {
@@ -258,11 +258,11 @@ export const update = async (req, res) => {
         if (!find_categories) { return res.json({ success: false, message: "Category Not Found" }) }
 
         // Find the items by Name
-        const exist_items = await Social_Media_Boost_Model.exists({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') }, _id: { $ne: id } }] })
+        const exist_items = await Facebook_Boost_Model.exists({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') }, _id: { $ne: id } }] })
         if (exist_items) { return res.json({ success: false, message: "already exists. try another" }) }
 
         // Proceed to create
-        const result = await Social_Media_Boost_Model.findByIdAndUpdate(id, {
+        const result = await Facebook_Boost_Model.findByIdAndUpdate(id, {
             item_name: item_name,
             categories_id: categories_id,
             categories_name: find_categories.categories_name,
@@ -306,11 +306,11 @@ export const destroy = async (req, res) => {
         }
 
         // Find the items by ID
-        const find_items = await Social_Media_Boost_Model.findById(id);
+        const find_items = await Facebook_Boost_Model.findById(id);
         if (!find_items) { return res.json({ success: false, message: "Item Not Found" }) }
 
         // Proceed to delete
-        const result = await Social_Media_Boost_Model.findByIdAndDelete(id);
+        const result = await Facebook_Boost_Model.findByIdAndDelete(id);
         if (!result) {
             return res.json({ success: false, message: "Data Not Found" });
 
