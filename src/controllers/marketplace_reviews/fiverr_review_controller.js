@@ -302,10 +302,10 @@ export const update = async (req, res) => {
             attachment: attachment
         }, { new: true })
 
-        if (result) {
+        if (result) {            
             // change category items_count
-            if (categories_id && find_categories.categories_id !== categories_id) {
-                await CategoriesModel.findByIdAndUpdate(find_categories.categories_id, { $inc: { items_count: -1 } }); // Decrement old items_count
+            if (categories_id && find_categories._id !== categories_id) {
+                await CategoriesModel.findByIdAndUpdate(find_categories._id, { $inc: { items_count: -1 } }); // Decrement old items_count
                 await CategoriesModel.findByIdAndUpdate(categories_id, { $inc: { items_count: 1 } }); // Increment new items_count
             }
 
@@ -344,8 +344,8 @@ export const destroy = async (req, res) => {
                 await cloudinary.uploader.destroy(find_items.attachment.public_id);
             }
             // Decrement the items_count
-            if (find_items.categories_id) {
-                await CategoriesModel.findByIdAndUpdate(find_items.categories_id, { $inc: { items_count: -1 } })
+            if (find_items._id) {
+                await CategoriesModel.findByIdAndUpdate(find_items._id, { $inc: { items_count: -1 } })
             }
 
             return res.json({
