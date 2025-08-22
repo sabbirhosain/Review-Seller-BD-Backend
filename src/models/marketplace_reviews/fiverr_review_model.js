@@ -21,12 +21,12 @@ const Fiverr_Reviews_Schema = new mongoose.Schema({
         trim: true,
         default: [],
     },
-    price_usd: {
+    order_amount: {
         type: Number,
         trim: true,
         default: 0
     },
-    price_bdt: {
+    review_price: {
         type: Number,
         trim: true,
         default: 0

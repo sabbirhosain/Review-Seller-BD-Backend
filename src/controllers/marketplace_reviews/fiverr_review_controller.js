@@ -1,14 +1,16 @@
 import mongoose from "mongoose";
+import { v2 as cloudinary } from 'cloudinary';
+import { uploadCloudinary } from "../../multer/cloudinary.js";
 import CategoriesModel from "../../models/categories_model.js";
 import Fiverr_Reviews_Model from "../../models/marketplace_reviews/fiverr_review_model.js";
 
 export const create = async (req, res) => {
     try {
-        const { item_name, categories_id, review_from, price_usd, price_bdt, features, status, notes } = req.body;
+        const { item_name, categories_id, review_from, order_amount, review_price, features, status, notes } = req.body;
         const fields_validate = {
             string: ['item_name', 'review_from'],
             objectId: ['categories_id'],
-            number: ['price_usd', 'price_bdt'],
+            number: ['order_amount', 'review_price'],
             array: ['features']
             // boolean: ['is_available']
         };
@@ -57,8 +59,21 @@ export const create = async (req, res) => {
         const find_categories = await CategoriesModel.findById(categories_id);
         if (!find_categories) { return res.json({ success: false, message: "Category Not Found" }) }
 
-        const exist_items = await Fiverr_Reviews_Model.exists({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') } }] })
+        const exist_items = await Fiverr_Reviews_Model.findOne({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') } }] })
         if (exist_items) { return res.json({ success: false, message: "Already exists. Try another" }) }
+
+        // File upload handling
+        let attachment = null;
+        if (req.file && req.file.path) {
+            try {
+                const cloudinaryResult = await uploadCloudinary(req.file.path, 'Marketplace Reviews');
+                if (cloudinaryResult) { attachment = cloudinaryResult }
+
+            } catch (fileError) {
+                console.error('File upload error:', fileError);
+                return res.json({ success: false, message: 'Error processing file upload' });
+            }
+        }
 
         const result = await new Fiverr_Reviews_Model({
             item_name: item_name,
@@ -66,10 +81,11 @@ export const create = async (req, res) => {
             categories_name: find_categories.categories_name,
             features: features,
             review_from: review_from,
-            price_usd: price_usd,
-            price_bdt: price_bdt,
+            order_amount: order_amount,
+            review_price: review_price,
             status: status,
-            notes: notes
+            notes: notes,
+            attachment: attachment
         }).save();
 
         if (result) {
@@ -249,17 +265,29 @@ export const update = async (req, res) => {
         // }
         // status validation
         if (status && !['active', 'deactive'].includes(status)) {
-            return res.status(400).json({
-                success: false,
-                message: 'status must be either "active" or "deactive"'
-            });
+            return res.status(400).json({ success: false, message: 'status must be either "active" or "deactive"' });
         }
 
         const find_categories = await CategoriesModel.findById(categories_id);
         if (!find_categories) { return res.json({ success: false, message: "Category Not Found" }) }
 
-        const exist_items = await Fiverr_Reviews_Model.exists({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') }, _id: { $ne: id } }] })
-        if (exist_items) { return res.json({ success: false, message: "already exists. try another" }) }
+        const exist_items = await Fiverr_Reviews_Model.findOne({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') } }], _id: { $ne: new mongoose.Types.ObjectId(id) } });
+        if (exist_items) { return res.json({ success: false, message: "Items already exists. Try another" }) }
+
+        // File upload handling
+        let attachment = find_items.attachment;
+        if (req.file && req.file.path) {
+            try {
+                const cloudinaryResult = await uploadCloudinary(req.file.path, 'Marketplace Reviews');
+                if (cloudinaryResult) {
+                    if (attachment && attachment.public_id) { await cloudinary.uploader.destroy(attachment.public_id) }
+                    attachment = cloudinaryResult; // Delete old image if it exists
+                }
+            } catch (fileError) {
+                console.error('File upload error:', fileError);
+                return res.json({ success: false, message: 'Error processing file upload' });
+            }
+        }
 
         const result = await Fiverr_Reviews_Model.findByIdAndUpdate(id, {
             item_name: item_name,
@@ -270,12 +298,13 @@ export const update = async (req, res) => {
             price_usd: price_usd,
             price_bdt: price_bdt,
             status: status,
-            notes: notes
+            notes: notes,
+            attachment: attachment
         }, { new: true })
 
         if (result) {
             // change category items_count
-            if (categories_id && find_categories.categories_id.toString() !== categories_id) {
+            if (categories_id && find_categories.categories_id !== categories_id) {
                 await CategoriesModel.findByIdAndUpdate(find_categories.categories_id, { $inc: { items_count: -1 } }); // Decrement old items_count
                 await CategoriesModel.findByIdAndUpdate(categories_id, { $inc: { items_count: 1 } }); // Increment new items_count
             }
@@ -304,17 +333,19 @@ export const destroy = async (req, res) => {
         // check exist data
         const find_items = await Fiverr_Reviews_Model.findById(id);
         if (!find_items) { return res.json({ success: false, message: "Item Not Found" }) }
-
         const result = await Fiverr_Reviews_Model.findByIdAndDelete(id);
 
         // Check not found
         if (!result) {
             return res.json({ success: false, message: "Data Not Found" });
-
         } else {
+            // Delete attachment
+            if (find_items.attachment && find_items.attachment.public_id) {
+                await cloudinary.uploader.destroy(find_items.attachment.public_id);
+            }
             // Decrement the items_count
             if (find_items.categories_id) {
-                await CategoriesModel.findByIdAndUpdate(find_items.categories_id, { $inc: { items_count: -1 } });
+                await CategoriesModel.findByIdAndUpdate(find_items.categories_id, { $inc: { items_count: -1 } })
             }
 
             return res.json({

@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { v2 as cloudinary } from 'cloudinary';
+import { uploadCloudinary } from "../../multer/cloudinary.js";
 import CategoriesModel from "../../models/categories_model.js";
 import Google_Reviews_Model from "../../models/marketplace_reviews/google_review_model.js";
 
@@ -51,6 +53,19 @@ export const create = async (req, res) => {
         const exist_items = await Google_Reviews_Model.exists({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') } }] })
         if (exist_items) { return res.json({ success: false, message: "Already exists. Try another" }) }
 
+        // File upload handling
+        let attachment = null;
+        if (req.file && req.file.path) {
+            try {
+                const cloudinaryResult = await uploadCloudinary(req.file.path, 'Premium Tools');
+                if (cloudinaryResult) { attachment = cloudinaryResult }
+
+            } catch (error) {
+                console.error('File upload error:', error);
+                return res.json({ success: false, message: 'Error processing file upload' });
+            }
+        }
+
         const result = await new Google_Reviews_Model({
             item_name: item_name,
             categories_id: categories_id,
@@ -60,7 +75,8 @@ export const create = async (req, res) => {
             price_usd: price_usd,
             price_bdt: price_bdt,
             status: status,
-            notes: notes
+            notes: notes,
+            attachment: attachment
         }).save();
 
         if (result) {
@@ -233,8 +249,23 @@ export const update = async (req, res) => {
         const find_categories = await CategoriesModel.findById(categories_id);
         if (!find_categories) { return res.json({ success: false, message: "Category Not Found" }) }
 
-        const exist_items = await Google_Reviews_Model.exists({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') }, _id: { $ne: id } }] })
-        if (exist_items) { return res.json({ success: false, message: "already exists. try another" }) }
+        const exist_items = await Google_Reviews_Model.findOne({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') } }], _id: { $ne: new mongoose.Types.ObjectId(id) } });
+        if (exist_items) { return res.json({ success: false, message: "Items already exists. Try another" }) }
+
+        // File upload handling
+        let attachment = find_items.attachment;
+        if (req.file && req.file.path) {
+            try {
+                const cloudinaryResult = await uploadCloudinary(req.file.path, 'Marketplace Reviews');
+                if (cloudinaryResult) {
+                    if (attachment && attachment.public_id) { await cloudinary.uploader.destroy(attachment.public_id) }
+                    attachment = cloudinaryResult; // Delete old image if it exists
+                }
+            } catch (fileError) {
+                console.error('File upload error:', fileError);
+                return res.json({ success: false, message: 'Error processing file upload' });
+            }
+        }
 
         const result = await Google_Reviews_Model.findByIdAndUpdate(id, {
             item_name: item_name,
@@ -245,7 +276,8 @@ export const update = async (req, res) => {
             price_usd: price_usd,
             price_bdt: price_bdt,
             status: status,
-            notes: notes
+            notes: notes,
+            attachment: attachment
         }, { new: true })
 
         if (result) {
@@ -279,7 +311,6 @@ export const destroy = async (req, res) => {
         // check exist data
         const find_items = await Google_Reviews_Model.findById(id);
         if (!find_items) { return res.json({ success: false, message: "Item Not Found" }) }
-
         const result = await Google_Reviews_Model.findByIdAndDelete(id);
 
         // Check not found
@@ -287,6 +318,10 @@ export const destroy = async (req, res) => {
             return res.json({ success: false, message: "Data Not Found" });
 
         } else {
+            // Delete attachment
+            if (find_items.attachment && find_items.attachment.public_id) {
+                await cloudinary.uploader.destroy(find_items.attachment.public_id);
+            }
             // Decrement the items_count
             if (find_items.categories_id) {
                 await CategoriesModel.findByIdAndUpdate(find_items.categories_id, { $inc: { items_count: -1 } });
