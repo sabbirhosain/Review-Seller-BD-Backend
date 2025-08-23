@@ -280,11 +280,10 @@ export const update = async (req, res) => {
 
         if (result) {
             // change category items_count
-            if (categories_id && find_categories.categories_id.toString() !== categories_id) {
-                await CategoriesModel.findByIdAndUpdate(find_categories.categories_id, { $inc: { items_count: -1 } }); // Decrement old items_count
+            if (categories_id && find_categories._id !== categories_id) {
+                await CategoriesModel.findByIdAndUpdate(find_categories._id, { $inc: { items_count: -1 } }); // Decrement old items_count
                 await CategoriesModel.findByIdAndUpdate(categories_id, { $inc: { items_count: 1 } }); // Increment new items_count
             }
-
             return res.json({
                 success: true,
                 message: 'Item Update Success',

@@ -10,6 +10,8 @@ import * as people_per_review_controller from "../controllers/marketplace_review
 import * as facebook_boost_controller from "../controllers/social_media_boost/facebook_boost_controller.js";
 import * as youtube_boost_controller from "../controllers/social_media_boost/youtube_boost_controller.js";
 import * as google_ads_boost_controller from "../controllers/social_media_boost/google_ads_controller.js";
+import * as marketplace_reviews_checkout_controller from "../controllers/marketplace_reviews/marketplace_checkout_controller.js";
+import * as social_media_boost_checkout_controller from "../controllers/social_media_boost/social_media_checkout_controller.js";
 import * as contact_controller from "../controllers/contact_controller.js";
 import upload from "../multer/multer.js";
 const router = express.Router();
@@ -90,6 +92,20 @@ router.get("/social-media-boost/items/google-ads", google_ads_boost_controller.s
 router.get("/social-media-boost/items/google-ads/:id", google_ads_boost_controller.single)
 router.put("/social-media-boost/items/google-ads/:id", google_ads_boost_controller.update)
 router.delete("/social-media-boost/items/google-ads/:id", google_ads_boost_controller.destroy)
+
+// Private routes || /api/v1/marketplace-reviews/checkout
+router.post("/marketplace-reviews/checkout", marketplace_reviews_checkout_controller.create)
+router.get("/marketplace-reviews/checkout", marketplace_reviews_checkout_controller.show)
+router.get("/marketplace-reviews/checkout/:id", marketplace_reviews_checkout_controller.single)
+router.put("/marketplace-reviews/checkout/:id", marketplace_reviews_checkout_controller.update)
+router.delete("/marketplace-reviews/checkout/:id", marketplace_reviews_checkout_controller.destroy)
+
+// Private routes || /api/v1/social-media-boost/checkout
+router.post("/social-media-boost/checkout", social_media_boost_checkout_controller.create)
+router.get("/social-media-boost/checkout", social_media_boost_checkout_controller.show)
+router.get("/social-media-boost/checkout/:id", social_media_boost_checkout_controller.single)
+router.put("/social-media-boost/checkout/:id", social_media_boost_checkout_controller.update)
+router.delete("/social-media-boost/checkout/:id", social_media_boost_checkout_controller.destroy)
 
 // Private routes || /api/v1/contact-from
 router.post("/contact-from", contact_controller.create)

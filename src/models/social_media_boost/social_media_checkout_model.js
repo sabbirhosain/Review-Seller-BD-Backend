@@ -21,9 +21,17 @@ const Social_Media_Checkout_Schema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    package: {
-        price_usd: { type: Number },
-        price_bdt: { type: Number }
+    review_from: {
+        type: String,
+        trim: true
+    },
+    order_amount: {
+        type: Number,
+        trim: true
+    },
+    review_price: {
+        type: Number,
+        trim: true
     },
     delivery_date_and_time: {
         type: Date,

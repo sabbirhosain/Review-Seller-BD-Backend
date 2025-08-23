@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Fiverr_Reviews_Model from "../../models/marketplace_reviews/fiverr_review_model.js";
 import Google_Reviews_Model from "../../models/marketplace_reviews/google_review_model.js";
 import Kwork_Reviews_Model from "../../models/marketplace_reviews/kwork_review_model.js";
@@ -37,16 +38,15 @@ export const create = async (req, res) => {
         }
 
         // Save to DB
-        const result = await new CheckoutModel({
+        const result = await new Marketplace_Checkout_Model({
             date_and_time: new Date(),
             date_and_time_formated: formatDateOnly(new Date()),
             item_id: item_id,
             item_name: find_items.item_name,
             categories: find_items.categories_name,
-            package: {
-                price_usd: find_items.price_usd,
-                price_bdt: find_items.price_bdt
-            },
+            review_from: find_items.review_from,
+            order_amount: find_items.order_amount,
+            review_price: find_items.review_price,
             billing_address: {
                 ...billing_address,
                 full_name: billing_address.first_name + " " + billing_address.last_name
@@ -225,18 +225,13 @@ export const update = async (req, res) => {
 
 export const destroy = async (req, res) => {
     try {
-        const { id } = req.params
-
         // Validate the mongoose id
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.json({ success: false, message: "Invalid ID format" });
-        }
+        const { id } = req.params
+        if (!mongoose.Types.ObjectId.isValid(id)) { return res.json({ success: false, message: "Invalid ID format" }) }
 
         // check exist data
-        const findOne = await Marketplace_Checkout_Model.findById(id);
-        if (!findOne) {
-            return res.json({ message: "Item not found" });
-        }
+        const find_items = await Marketplace_Checkout_Model.findById(id);
+        if (!find_items) { return res.json({ message: "Item not found" }) }
 
         const result = await Marketplace_Checkout_Model.findByIdAndDelete(id);
 
