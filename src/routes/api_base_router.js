@@ -73,24 +73,24 @@ router.put("/marketplace-reviews/items/fetchers/:id", upload.single("attachment"
 router.delete("/marketplace-reviews/items/fetchers/:id", fetchers_review_controller.destroy)
 
 // Private routes || /api/v1/social-media-boost/items/facebook
-router.post("/social-media-boost/items/facebook", facebook_boost_controller.create)
+router.post("/social-media-boost/items/facebook", upload.single("attachment"), facebook_boost_controller.create)
 router.get("/social-media-boost/items/facebook", facebook_boost_controller.show)
 router.get("/social-media-boost/items/facebook/:id", facebook_boost_controller.single)
-router.put("/social-media-boost/items/facebook/:id", facebook_boost_controller.update)
+router.put("/social-media-boost/items/facebook/:id", upload.single("attachment"), facebook_boost_controller.update)
 router.delete("/social-media-boost/items/facebook/:id", facebook_boost_controller.destroy)
 
 // Private routes || /api/v1/social-media-boost/items/youtube
-router.post("/social-media-boost/items/youtube", youtube_boost_controller.create)
+router.post("/social-media-boost/items/youtube", upload.single("attachment"), youtube_boost_controller.create)
 router.get("/social-media-boost/items/youtube", youtube_boost_controller.show)
 router.get("/social-media-boost/items/youtube/:id", youtube_boost_controller.single)
-router.put("/social-media-boost/items/youtube/:id", youtube_boost_controller.update)
+router.put("/social-media-boost/items/youtube/:id", upload.single("attachment"), youtube_boost_controller.update)
 router.delete("/social-media-boost/items/youtube/:id", youtube_boost_controller.destroy)
 
 // Private routes || /api/v1/social-media-boost/items/google-ads
-router.post("/social-media-boost/items/google-ads", google_ads_boost_controller.create)
+router.post("/social-media-boost/items/google-ads", upload.single("attachment"), google_ads_boost_controller.create)
 router.get("/social-media-boost/items/google-ads", google_ads_boost_controller.show)
 router.get("/social-media-boost/items/google-ads/:id", google_ads_boost_controller.single)
-router.put("/social-media-boost/items/google-ads/:id", google_ads_boost_controller.update)
+router.put("/social-media-boost/items/google-ads/:id", upload.single("attachment"), google_ads_boost_controller.update)
 router.delete("/social-media-boost/items/google-ads/:id", google_ads_boost_controller.destroy)
 
 // Private routes || /api/v1/marketplace-reviews/checkout

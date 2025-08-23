@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { v2 as cloudinary } from 'cloudinary';
+import { uploadCloudinary } from "../../multer/cloudinary.js";
 import CategoriesModel from "../../models/categories_model.js";
 import Facebook_Boost_Model from "../../models/social_media_boost/facebook_boost_model.js";
 
@@ -63,6 +65,19 @@ export const create = async (req, res) => {
         const exist_items = await Facebook_Boost_Model.exists({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') } }] })
         if (exist_items) { return res.json({ success: false, message: "already exists. try another" }) }
 
+        // File upload handling
+        let attachment = null;
+        if (req.file && req.file.path) {
+            try {
+                const cloudinaryResult = await uploadCloudinary(req.file.path, 'Social Media Boost');
+                if (cloudinaryResult) { attachment = cloudinaryResult }
+
+            } catch (fileError) {
+                console.error('File upload error:', fileError);
+                return res.json({ success: false, message: 'Error processing file upload' });
+            }
+        }
+
         const result = await new Facebook_Boost_Model({
             item_name: item_name,
             categories_id: categories_id,
@@ -74,7 +89,8 @@ export const create = async (req, res) => {
             duration_type: duration_type,
             review_from: review_from,
             status: status,
-            notes: notes
+            notes: notes,
+            attachment: attachment
         }).save();
 
         if (result) {
@@ -261,6 +277,21 @@ export const update = async (req, res) => {
         const exist_items = await Facebook_Boost_Model.exists({ $or: [{ item_name: { $regex: new RegExp(`^${item_name.trim()}$`, 'i') }, _id: { $ne: id } }] })
         if (exist_items) { return res.json({ success: false, message: "already exists. try another" }) }
 
+        // File upload handling
+        let attachment = find_items.attachment;
+        if (req.file && req.file.path) {
+            try {
+                const cloudinaryResult = await uploadCloudinary(req.file.path, 'Social Media Boost');
+                if (cloudinaryResult) {
+                    if (attachment && attachment.public_id) { await cloudinary.uploader.destroy(attachment.public_id) }
+                    attachment = cloudinaryResult; // Delete old image if it exists
+                }
+            } catch (fileError) {
+                console.error('File upload error:', fileError);
+                return res.json({ success: false, message: 'Error processing file upload' });
+            }
+        }
+
         // Proceed to create
         const result = await Facebook_Boost_Model.findByIdAndUpdate(id, {
             item_name: item_name,
@@ -273,7 +304,8 @@ export const update = async (req, res) => {
             duration_type: duration_type,
             review_from: review_from,
             status: status,
-            notes: notes
+            notes: notes,
+            attachment: attachment
         }, { new: true })
 
         if (result) {
@@ -308,13 +340,16 @@ export const destroy = async (req, res) => {
         // Find the items by ID
         const find_items = await Facebook_Boost_Model.findById(id);
         if (!find_items) { return res.json({ success: false, message: "Item Not Found" }) }
-
-        // Proceed to delete
         const result = await Facebook_Boost_Model.findByIdAndDelete(id);
+
         if (!result) {
             return res.json({ success: false, message: "Data Not Found" });
 
         } else {
+            // Delete attachment
+            if (find_items.attachment && find_items.attachment.public_id) {
+                await cloudinary.uploader.destroy(find_items.attachment.public_id);
+            }
             // Decrement the items_count
             if (find_items.categories_id) {
                 await CategoriesModel.findByIdAndUpdate(find_items.categories_id, { $inc: { items_count: -1 } });
